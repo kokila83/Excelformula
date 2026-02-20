@@ -1,0 +1,806 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red0\green128\blue0;\red255\green0\blue0;\red128\green0\blue128;}
+
+{\*\generator Microsoft Word;}
+\paperw12240\paperh15840\margl1440\margr1440\margt1440\margb1440
+
+{\pard\qc\b\fs36 CrunchCore.cs - Complete Function Reference\par}
+{\pard\qc\fs24 All 8 Algorithms Explained with Examples\par}
+{\pard\qc\fs20 Input/Output Specifications and Array Index Meanings\par}
+\par
+
+{\pard\sb240\sa120\b\fs28\ul Table of Contents\par}
+{\pard\li720\sb60
+1. CrunchSumK0G0 - Sum with No Keys, No Groups\par
+2. CrunchSumK0G2 - Sum with No Keys, 2 Dimensions\par
+3. CrunchSumK1G0 - Sum with 1 Key, No Groups\par
+4. CrunchSumK1G1 - Sum with 1 Key, 1 Dimension\par
+5. CrunchBoxK0G0 - Box with No Keys, No Groups\par
+6. CrunchBoxK0G2 - Box with No Keys, 2 Dimensions\par
+7. CrunchBoxK1G1 - Box with 1 Key, 1 Dimension\par
+8. CrunchBoxK1G0 - Box with 1 Key, No Groups\par
+\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 1. CrunchSumK0G0\par}
+{\pard\sb120\b\fs24 Purpose: Sum ALL data (no grouping, no keys)\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchSumK0G0(CrunchLayout layout, ICrunchInputReader reader, ICrunchSumOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=0, GroupCount=0, Mode=Sum\par
+\bullet  {\b reader}: Reads rows from binary file or database\par
+\bullet  {\b writer}: Writes output results\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b k[]} (int array) - Key columns (empty for K=0)\par
+{\b g[][]} (byte 2D array) - Group columns (empty for G=0)\par
+{\b d[]} (sbyte array) - Dummy columns (usually 0 or 1 values)\par
+{\b v[]} (double array) - Value columns (e.g., balance, contributions)\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b ki[]} (byte array) - Key indices (empty)\par
+{\b kv[]} (int array) - Key values (empty)\par
+{\b gi[]} (byte array) - Group indices (empty)\par
+{\b gv[]} (byte array) - Group values (empty)\par
+{\b DummySum[]} (int array) - Sum of dummy columns\par
+{\b ValueSum[]} (double array) - Sum of value columns\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Input Data (4 rows, 3 value columns):\par}
+{\pard\li720\f1\fs18
+Row 1: v = [1000.00, 500.00, 250.00]\par
+Row 2: v = [2000.00, 800.00, 300.00]\par
+Row 3: v = [1500.00, 600.00, 275.00]\par
+Row 4: v = [1800.00, 700.00, 290.00]\par}
+
+{\pard\sb60\b Processing:\par}
+{\pard\li720\fs20
+1. Create single CrunchSum accumulator\par
+2. Read each row, add values to accumulator\par
+3. Write single output row with totals\par}
+
+{\pard\sb60\b Output (1 row):\par}
+{\pard\li720\f1\fs18
+ki=[], kv=[], gi=[], gv=[]\par
+DummySum=[4]  (4 participants)\par
+ValueSum=[6300.00, 2600.00, 1115.00]  (totals across all rows)\par}
+
+{\pard\sb120\b\fs22 Array Index Meanings:\par}
+{\pard\li720\sb60
+{\b v[0]} = First value column (e.g., total_balance)\par
+{\b v[1]} = Second value column (e.g., contributions)\par
+{\b v[2]} = Third value column (e.g., withdrawals)\par
+{\b ValueSum[i]} = Sum of all rows for value column i\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 2. CrunchSumK0G2\par}
+{\pard\sb120\b\fs24 Purpose: Sum with 2-Dimensional Grouping (no keys)\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchSumK0G2(CrunchLayout layout, ICrunchInputReader reader, ICrunchSumOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=0, GroupCount=2 (e.g., G1=3 mkt cols, G2=18 pop cols)\par
+\bullet  {\b reader}: Reads participant data\par
+\bullet  {\b writer}: Writes cross-tabulated results\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b k[]} - Empty (K=0)\par
+{\b g[0][]} - Dimension 0 values (e.g., 3 bytes for mkt_01, mkt_02, mkt_03)\par
+{\b g[1][]} - Dimension 1 values (e.g., 18 bytes for pop_01, pop_02, ..., pop_74)\par
+{\b d[]} - Dummy column (count=1 for active participant)\par
+{\b v[]} - Value columns (e.g., balance, returns)\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b gi[0]} - Which column in dimension 0 (0=mkt_01, 1=mkt_02, 2=mkt_03)\par
+{\b gi[1]} - Which column in dimension 1 (0=pop_01, 1=pop_02, ...)\par
+{\b gv[0]} - Value from dimension 0 column (e.g., 2 = market segment 2)\par
+{\b gv[1]} - Value from dimension 1 column (e.g., 3 = age bracket 3)\par
+{\b DummySum[]} - Count of participants in this bucket\par
+{\b ValueSum[]} - Sum of values for this bucket\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Input Data (Participant-Level):\par}
+{\pard\li720\f1\fs18
+Row 1: g[0]=[2,1,3], g[1]=[1,0,2,...], v=[5000.00, 0.05], d=[1]\par
+Row 2: g[0]=[2,1,3], g[1]=[1,0,2,...], v=[3000.00, 0.03], d=[1]\par
+Row 3: g[0]=[3,2,1], g[1]=[2,1,1,...], v=[7000.00, 0.07], d=[1]\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b g[0][0]} = Value in mkt_01 column (participant's market segment)\par
+{\b g[0][1]} = Value in mkt_02 column (participant's sub-segment)\par
+{\b g[0][2]} = Value in mkt_03 column (participant's plan size)\par
+{\b g[1][0]} = Value in pop_01 column (participant's age bracket)\par
+{\b g[1][1]} = Value in pop_02 column (participant's gender)\par
+{\b g[1][2]} = Value in pop_03 column (participant's tenure)\par}
+
+{\pard\sb60\b Memory Structure:\par}
+{\pard\li720\f1\fs18
+sum[ordinal][m][n] where:\par
+  ordinal = column combination (0-53 for 3x18)\par
+  m = group value from dimension 0 (0-max_mkt_value)\par
+  n = group value from dimension 1 (0-max_pop_value)\par
+\par
+Example: sum[0][2][1] accumulates data for:\par
+  - Column combo 0 (mkt_01 x pop_01)\par
+  - mkt_01 value = 2\par
+  - pop_01 value = 1\par}
+
+{\pard\sb60\b Processing Algorithm:\par}
+{\pard\li720\fs20
+1. Allocate 4D array: sum[54][max_m+1][max_n+1]\par
+2. For each participant row:\par
+   - Extract g[0] and g[1] arrays\par
+   - For each (i,j) combination:\par
+     ordinal = i*18 + j\par
+     sum[ordinal][g[0][i]][g[1][j]].Add(d, v)\par
+3. Write output for all combinations where count > 0\par}
+
+{\pard\sb60\b Output Example (Partial - 3 rows of ~1,000s):\par}
+{\pard\li720\f1\fs18
+gi=[0,0], gv=[2,1], DummySum=[2], ValueSum=[8000.00, 0.08]\par
+  Meaning: mkt_01=2 AND pop_01=1, 2 participants, totals\par
+\par
+gi=[1,0], gv=[1,1], DummySum=[2], ValueSum=[8000.00, 0.08]\par
+  Meaning: mkt_02=1 AND pop_01=1, 2 participants, totals\par
+\par
+gi=[0,0], gv=[3,2], DummySum=[1], ValueSum=[7000.00, 0.07]\par
+  Meaning: mkt_01=3 AND pop_01=2, 1 participant, totals\par}
+
+{\pard\sb60\b Total Output Rows:\par}
+{\pard\li720\fs20
+For G1=3, G2=18:\par
+\bullet  54 column combinations (3 \'d7 18)\par
+\bullet  Each combination has multiple (m, n) value pairs\par
+\bullet  Typical output: 1,000 to 50,000 rows depending on data cardinality\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 3. CrunchSumK1G0\par}
+{\pard\sb120\b\fs24 Purpose: Sum by Key (no groups) - Participant-Level Totals\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchSumK1G0(CrunchLayout layout, ICrunchInputReader reader, ICrunchSumOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=1, GroupCount=0\par
+\bullet  {\b reader}: Reads participant data (MUST be sorted by key)\par
+\bullet  {\b writer}: Writes one row per unique key\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b k[0]} - Key value (e.g., participant ID, plan ID)\par
+{\b g[][]} - Empty (no grouping)\par
+{\b d[]} - Dummy columns\par
+{\b v[]} - Value columns (monthly balances, transactions, etc.)\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b ki[0]} - Always 0 (key index placeholder)\par
+{\b kv[0]} - The actual key value\par
+{\b gi[]} - Empty\par
+{\b gv[]} - Empty\par
+{\b DummySum[]} - Sum of dummy columns for this key\par
+{\b ValueSum[]} - Sum of value columns for this key\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Input Data (Sorted by Key - Participant ID):\par}
+{\pard\li720\f1\fs18
+Row 1: k=[12345], v=[1000.00, 500.00], d=[1]\par
+Row 2: k=[12345], v=[1100.00, 520.00], d=[1]  (same participant, next month)\par
+Row 3: k=[12345], v=[1200.00, 540.00], d=[1]  (same participant, next month)\par
+Row 4: k=[67890], v=[2000.00, 800.00], d=[1]  (different participant)\par
+Row 5: k=[67890], v=[2100.00, 820.00], d=[1]\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b k[0]} = Participant ID or Plan ID (the grouping key)\par
+{\b v[0]} = Balance column\par
+{\b v[1]} = Contribution column\par
+{\b d[0]} = Month count (usually 1 per row)\par}
+
+{\pard\sb60\b Processing Algorithm:\par}
+{\pard\li720\fs20
+1. Read first row, store currKey = k[0]\par
+2. Accumulate values while k[0] == currKey\par
+3. When k[0] changes:\par
+   - Write accumulated totals for currKey\par
+   - Reset accumulator\par
+   - Update currKey = new k[0]\par
+4. Continue until end of file\par}
+
+{\pard\sb60\b Output (2 rows, one per participant):\par}
+{\pard\li720\f1\fs18
+ki=[0], kv=[12345], gi=[], gv=[]\par
+  DummySum=[3], ValueSum=[3300.00, 1560.00]\par
+  Meaning: Participant 12345, 3 months, totals\par
+\par
+ki=[0], kv=[67890], gi=[], gv=[]\par
+  DummySum=[2], ValueSum=[4100.00, 1620.00]\par
+  Meaning: Participant 67890, 2 months, totals\par}
+
+{\pard\sb60\b\cf4 Critical Requirement:\par}
+{\pard\li720\fs20\cf4
+Input data MUST be sorted by key column. If not sorted, results will be incorrect.\par
+The algorithm assumes consecutive rows with same key are together.\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 4. CrunchSumK1G1\par}
+{\pard\sb120\b\fs24 Purpose: Sum by Key with 1 Dimension - Participant Totals by Segments\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchSumK1G1(CrunchLayout layout, ICrunchInputReader reader, ICrunchSumOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=1, GroupCount=1 (e.g., G1=3 columns)\par
+\bullet  {\b reader}: Reads participant data sorted by key\par
+\bullet  {\b writer}: Writes multiple rows per key (one per group combination)\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b k[0]} - Participant ID or Plan ID\par
+{\b g[0][]} - Group dimension 0 (e.g., 3 values for fund categories)\par
+{\b d[]} - Dummy columns\par
+{\b v[]} - Value columns\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b ki[0]} - Always 0\par
+{\b kv[0]} - The participant/plan key\par
+{\b gi[0]} - Which column in dimension 0 (0, 1, 2)\par
+{\b gv[0]} - Value from that column (fund category code)\par
+{\b DummySum[]} - Sum for this key + group combo\par
+{\b ValueSum[]} - Sum for this key + group combo\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Use Case: Plan-level deferrals by fund category\par}
+{\pard\li720\fs20
+G1 has 3 columns representing fund categories:\par
+  g[0][0] = Pre-tax deferral category\par
+  g[0][1] = Roth deferral category\par
+  g[0][2] = After-tax deferral category\par}
+
+{\pard\sb60\b Input Data:\par}
+{\pard\li720\f1\fs18
+Row 1: k=[PLN001], g[0]=[1,0,0], v=[50000.00], d=[1]\par
+  Plan PLN001, pre-tax only (category 1), no Roth, no after-tax\par
+\par
+Row 2: k=[PLN001], g[0]=[1,0,0], v=[52000.00], d=[1]\par
+  Same plan, next month\par
+\par
+Row 3: k=[PLN002], g[0]=[1,2,0], v=[30000.00], d=[1]\par
+  Plan PLN002, pre-tax category 1, Roth category 2\par
+\par
+Row 4: k=[PLN002], g[0]=[1,2,0], v=[31000.00], d=[1]\par
+  Same plan, next month\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b g[0][i]} = Fund category code for column i (0=none, 1-9=category codes)\par
+{\b sum[i][m]} where:\par
+  i = column index (0, 1, 2)\par
+  m = category value (0-9)\par}
+
+{\pard\sb60\b Processing:\par}
+{\pard\li720\fs20
+For each key (plan):\par
+1. Accumulate in sum[i][g[0][i]] for all rows with same key\par
+2. When key changes, write output for ALL non-zero combinations\par
+3. Reset accumulators and move to next key\par}
+
+{\pard\sb60\b Output (6 rows - 3 per plan):\par}
+{\pard\li720\f1\fs18
+ki=[0], kv=[PLN001], gi=[0], gv=[1], DummySum=[2], ValueSum=[102000.00]\par
+  Plan PLN001, pre-tax column, category 1, 2 months\par
+\par
+ki=[0], kv=[PLN001], gi=[1], gv=[0], DummySum=[2], ValueSum=[102000.00]\par
+  Plan PLN001, Roth column, category 0 (no Roth), 2 months\par
+\par
+ki=[0], kv=[PLN001], gi=[2], gv=[0], DummySum=[2], ValueSum=[102000.00]\par
+  Plan PLN001, after-tax column, category 0 (none), 2 months\par
+\par
+ki=[0], kv=[PLN002], gi=[0], gv=[1], DummySum=[2], ValueSum=[61000.00]\par
+  Plan PLN002, pre-tax column, category 1\par
+\par
+ki=[0], kv=[PLN002], gi=[1], gv=[2], DummySum=[2], ValueSum=[61000.00]\par
+  Plan PLN002, Roth column, category 2\par
+\par
+ki=[0], kv=[PLN002], gi=[2], gv=[0], DummySum=[2], ValueSum=[61000.00]\par
+  Plan PLN002, after-tax column, category 0 (none)\par}
+
+{\pard\sb60\b Output Pattern:\par}
+{\pard\li720\fs20
+For each unique key: {\b GroupColumns[0]} rows output\par
+In this case: 3 rows per plan (one for each fund category column)\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 5. CrunchBoxK0G0\par}
+{\pard\sb120\b\fs24 Purpose: Percentile Distribution (no keys, no groups)\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchBoxK0G0(CrunchLayout layout, CrunchHeap heap, CrunchInputFileReader reader, ICrunchBoxOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=0, GroupCount=0, Mode=Box\par
+\bullet  {\b heap}: In-memory storage of all data\par
+\bullet  {\b reader}: Reads ONE COLUMN at a time from binary file\par
+\bullet  {\b writer}: Writes percentiles for each value column\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b k} (int) - Column index being processed\par
+{\b data[]} (double array) - All values for this column across all participants\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b ki[]} - Empty\par
+{\b kv[]} - Empty\par
+{\b gi[]} - Empty\par
+{\b gv[]} - Empty\par
+{\b vi} (int) - Value column index\par
+{\b vq} (int) - Count of non-null values\par
+{\b vs[]} (double array) - 7 percentiles: [P05, P10, P25, P50, P75, P90, P95]\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Input Data (1 value column, 10 participants):\par}
+{\pard\li720\f1\fs18
+Column k=0 (3-month return):\par
+data = [0.02, 0.05, 0.03, 0.08, 0.04, 0.06, 0.01, 0.07, 0.05, 0.09]\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b data[r]} = Value for row r (participant r)\par
+{\b vs[0]} = 5th percentile\par
+{\b vs[1]} = 10th percentile\par
+{\b vs[2]} = 25th percentile (Q1)\par
+{\b vs[3]} = 50th percentile (Median)\par
+{\b vs[4]} = 75th percentile (Q3)\par
+{\b vs[5]} = 90th percentile\par
+{\b vs[6]} = 95th percentile\par}
+
+{\pard\sb60\b Processing Algorithm:\par}
+{\pard\li720\fs20
+For each value column:\par
+1. Read entire column into data[]\par
+2. Count non-null values -> vq\par
+3. Extract non-null values into va[]\par
+4. Compute percentiles using CrunchStats.SummaryL3\par
+5. Write single output row with percentiles\par}
+
+{\pard\sb60\b Output (1 row per value column):\par}
+{\pard\li720\f1\fs18
+ki=[], kv=[], gi=[], gv=[]\par
+vi=0, vq=10\par
+vs=[0.012, 0.019, 0.028, 0.045, 0.068, 0.084, 0.088]\par
+  P05=0.012 (5% of participants have returns <= 1.2%)\par
+  P10=0.019 (10% <= 1.9%)\par
+  P25=0.028 (25% <= 2.8%)\par
+  P50=0.045 (50% <= 4.5% - MEDIAN)\par
+  P75=0.068 (75% <= 6.8%)\par
+  P90=0.084 (90% <= 8.4%)\par
+  P95=0.088 (95% <= 8.8%)\par}
+
+{\pard\sb60\b Output Volume:\par}
+{\pard\li720\fs20
+For 16 value columns: exactly 16 output rows (one per column)\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 6. CrunchBoxK0G2\par}
+{\pard\sb120\b\fs24 Purpose: Percentile Distribution with 2D Grouping\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchBoxK0G2(CrunchLayout layout, CrunchHeap heap, CrunchInputFileReader reader, ICrunchBoxOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=0, GroupCount=2 (e.g., G1=3, G2=18)\par
+\bullet  {\b heap}: Contains Group[0][i][r] and Group[1][j][r] for all rows\par
+\bullet  {\b reader}: Reads one value column at a time\par
+\bullet  {\b writer}: Writes percentiles for each (column_combo, value_pair)\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b k} - Value column index\par
+{\b data[r]} - Value for row r\par
+{\b heap.Group[0][i][r]} - Dimension 0 column i value for row r\par
+{\b heap.Group[1][j][r]} - Dimension 1 column j value for row r\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b gi[0]} - Column index in dimension 0 (0, 1, 2 for mkt columns)\par
+{\b gi[1]} - Column index in dimension 1 (0-17 for pop columns)\par
+{\b gv[0]} - Group value from dimension 0 (market segment code)\par
+{\b gv[1]} - Group value from dimension 1 (population segment code)\par
+{\b vi} - Value column index\par
+{\b vq} - Count of participants in this bucket\par
+{\b vs[]} - 7 percentiles for this bucket\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Input Data:\par}
+{\pard\li720\f1\fs18
+G1=3 (mkt_01, mkt_02, mkt_03), G2=2 (pop_01, pop_02) - simplified\par
+1 value column (balance)\par
+\par
+Participant data stored in heap:\par
+Row 0: Group[0][0][0]=2, Group[0][1][0]=1, Group[0][2][0]=3,\par
+       Group[1][0][0]=1, Group[1][1][0]=0\par
+       data[0] = 5000.00\par
+\par
+Row 1: Group[0][0][1]=2, Group[0][1][1]=1, Group[0][2][1]=3,\par
+       Group[1][0][1]=1, Group[1][1][1]=0\par
+       data[1] = 3000.00\par
+\par
+Row 2: Group[0][0][2]=3, Group[0][1][2]=2, Group[0][2][2]=1,\par
+       Group[1][0][2]=2, Group[1][1][2]=1\par
+       data[2] = 7000.00\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b ordinal} = i * GroupColumns[1] + j\par
+  Maps 2D (i,j) to 1D index\par
+  Example: i=1, j=5 -> ordinal = 1*18+5 = 23\par
+\par
+{\b vq[ordinal][m][n]} = Count for column combo ordinal, values (m,n)\par
+{\b vi[ordinal][m][n]} = Current insertion index\par
+{\b va[m][n][]} = Array of values for this bucket\par}
+
+{\pard\sb60\b Processing Algorithm:\par}
+{\pard\li720\fs20
+For each value column k:\par
+  For each column combination (i,j):\par
+    1. Count participants in each (m,n) bucket\par
+    2. Allocate va[m][n] arrays sized by counts\par
+    3. Populate va by scanning data[] and Group arrays\par
+    4. Compute percentiles for each bucket with count>0\par
+    5. Write output row\par}
+
+{\pard\sb60\b Memory Access Pattern:\par}
+{\pard\li720\f1\fs18
+For row r and column combo (i=1, j=3):\par
+  m = heap.Group[0][1][r]  // value from mkt_02\par
+  n = heap.Group[1][3][r]  // value from 4th pop column\par
+  va[m][n][index] = data[r]\par}
+
+{\pard\sb60\b Output Example (Partial):\par}
+{\pard\li720\f1\fs18
+gi=[0,0], gv=[2,1], vi=0, vq=2\par
+vs=[3000.00, 3200.00, 3500.00, 4000.00, 4500.00, 4800.00, 5000.00]\par
+  Meaning: mkt_01=2 AND pop_01=1, balance column,\par
+           2 participants, their percentiles\par
+\par
+gi=[1,0], gv=[1,1], vi=0, vq=2\par
+vs=[3000.00, 3200.00, 3500.00, 4000.00, 4500.00, 4800.00, 5000.00]\par
+  Meaning: mkt_02=1 AND pop_01=1, same 2 participants\par
+\par
+gi=[0,0], gv=[3,2], vi=0, vq=1\par
+vs=[7000.00, 7000.00, 7000.00, 7000.00, 7000.00, 7000.00, 7000.00]\par
+  Meaning: mkt_01=3 AND pop_01=2, 1 participant,\par
+           all percentiles equal (single value)\par}
+
+{\pard\sb60\b Output Volume:\par}
+{\pard\li720\fs20
+For G1=3, G2=18, V=16:\par
+\bullet  54 column combinations (3 \'d7 18)\par
+\bullet  Each combo processes all (m,n) value pairs\par
+\bullet  16 value columns\par
+\bullet  Typical output: 10,000 to 500,000 rows\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 7. CrunchBoxK1G1\par}
+{\pard\sb120\b\fs24 Purpose: Percentiles by Key with 1 Dimension\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchBoxK1G1(CrunchLayout layout, CrunchHeap heap, CrunchInputFileReader reader, ICrunchBoxOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=1, GroupCount=1\par
+\bullet  {\b heap}: Contains Key[0][r] and Group[0][i][r]\par
+\bullet  {\b reader}: Reads value columns\par
+\bullet  {\b writer}: Writes percentiles for each (key, group_column, group_value)\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b heap.Key[0][r]} - Key value for row r (MUST be sorted)\par
+{\b heap.Group[0][i][r]} - Group value for column i, row r\par
+{\b data[r]} - Value for row r in current column\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b ki[0]} - Always 0\par
+{\b kv[0]} - The key value (plan ID, participant ID)\par
+{\b gi[0]} - Group column index\par
+{\b gv[0]} - Group value\par
+{\b vi} - Value column index\par
+{\b vq} - Count of rows for this key + group combo\par
+{\b vs[]} - 7 percentiles\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Use Case: Plan-level deferral distributions by fund category\par}
+{\pard\li720\fs20
+G1=3 fund categories, K=1 plan ID\par
+Compute percentiles of participant deferrals within each plan-category\par}
+
+{\pard\sb60\b Input Data in Heap:\par}
+{\pard\li720\f1\fs18
+Plan PLN001 (rows 0-49, 50 participants):\par
+  Row 0-49: Key[0][r]=PLN001\par
+  Group[0][0][0-49] = pre-tax category (1,1,2,1,3,...)\par
+  Group[0][1][0-49] = Roth category (0,2,2,0,2,...)\par
+  Group[0][2][0-49] = after-tax category (0,0,0,0,1,...)\par
+\par
+Plan PLN002 (rows 50-99, 50 participants):\par
+  Row 50-99: Key[0][r]=PLN002\par
+  Group[0][0][50-99] = pre-tax category\par
+  ...\par
+\par
+Value column k=0 (deferral amount):\par
+  data[0-49] = PLN001 participant deferrals\par
+  data[50-99] = PLN002 participant deferrals\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b rmin[b]} = First row for key block b\par
+{\b rmax[b]} = Last row + 1 for key block b\par
+{\b vq[i][m]} = Count for group column i, value m, current key\par
+{\b va[m][]} = Array of values for group value m\par}
+
+{\pard\sb60\b Processing Algorithm:\par}
+{\pard\li720\fs20
+1. Scan heap to find key boundaries (rmin, rmax)\par
+2. For each value column:\par
+   For each key block b:\par
+     For each group column i:\par
+       a. Count values by group value m\par
+       b. Allocate va[m] arrays\par
+       c. Populate va from data[rmin[b]:rmax[b]]\par
+       d. Compute percentiles for each m\par
+       e. Write output rows\par}
+
+{\pard\sb60\b Output Example:\par}
+{\pard\li720\f1\fs18
+ki=[0], kv=[PLN001], gi=[0], gv=[1], vi=0, vq=30\par
+vs=[50.00, 100.00, 200.00, 350.00, 500.00, 700.00, 900.00]\par
+  Plan PLN001, pre-tax column, category 1,\par
+  30 participants in this category, their deferral percentiles\par
+\par
+ki=[0], kv=[PLN001], gi=[0], gv=[2], vi=0, vq=15\par
+vs=[100.00, 150.00, 250.00, 400.00, 550.00, 750.00, 950.00]\par
+  Plan PLN001, pre-tax column, category 2, 15 participants\par
+\par
+ki=[0], kv=[PLN001], gi=[1], gv=[2], vi=0, vq=25\par
+vs=[75.00, 120.00, 225.00, 375.00, 525.00, 725.00, 925.00]\par
+  Plan PLN001, Roth column, category 2, 25 participants\par}
+
+{\pard\sb60\b Output Pattern:\par}
+{\pard\li720\fs20
+For each unique key:\par
+  For each group column (3 in this example):\par
+    For each unique group value in that column:\par
+      One output row with percentiles\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf2 8. CrunchBoxK1G0\par}
+{\pard\sb120\b\fs24 Purpose: Percentiles by Key (no grouping)\par}
+
+{\pard\sb120\b\fs22 Function Signature:\par}
+{\pard\li720\f1\fs18
+private static void CrunchBoxK1G0(CrunchLayout layout, CrunchHeap heap, CrunchInputFileReader reader, ICrunchBoxOutputWriter writer)\par}
+
+{\pard\sb120\b\fs22 Parameters:\par}
+{\pard\li720\sb60
+\bullet  {\b layout}: Defines K=1, GroupCount=0\par
+\bullet  {\b heap}: Contains Key[0][r] values\par
+\bullet  {\b reader}: Reads value columns\par
+\bullet  {\b writer}: Writes percentiles for each key\par}
+
+{\pard\sb120\b\fs22 Input Data Structure:\par}
+{\pard\li720\sb60
+{\b heap.Key[0][r]} - Key value for row r\par
+{\b data[r]} - Value for row r in current column\par}
+
+{\pard\sb120\b\fs22 Output Structure:\par}
+{\pard\li720\sb60
+{\b ki[0]} - Always 0\par
+{\b kv[0]} - The key value\par
+{\b gi[]} - Empty\par
+{\b gv[]} - Empty\par
+{\b vi} - Value column index\par
+{\b vq} - Count of rows for this key\par
+{\b vs[]} - 7 percentiles for this key\par}
+
+{\pard\sb120\b\fs22\cf3 Example:\par}
+{\pard\sb60\b Use Case: Plan-level participant distributions\par}
+{\pard\li720\fs20
+For each plan, compute percentiles of participant balances/returns\par}
+
+{\pard\sb60\b Input Data in Heap:\par}
+{\pard\li720\f1\fs18
+Plan PLN001 (100 participants, rows 0-99):\par
+  Key[0][0-99] = PLN001\par
+  data[0-99] = participant balances\par
+\par
+Plan PLN002 (150 participants, rows 100-249):\par
+  Key[0][100-249] = PLN002\par
+  data[100-249] = participant balances\par
+\par
+Plan PLN003 (75 participants, rows 250-324):\par
+  Key[0][250-324] = PLN003\par
+  data[250-324] = participant balances\par}
+
+{\pard\sb60\b Array Index Meanings:\par}
+{\pard\li720\fs20
+{\b keyq} = Number of unique keys\par
+{\b rmin[b]} = Starting row for key block b\par
+{\b rmax[b]} = Ending row + 1 for key block b\par
+{\b va[]} = Array of values for current key\par}
+
+{\pard\sb60\b Processing Algorithm:\par}
+{\pard\li720\fs20
+1. Scan heap to identify key boundaries:\par
+   rmin[0]=0, rmax[0]=100 (PLN001)\par
+   rmin[1]=100, rmax[1]=250 (PLN002)\par
+   rmin[2]=250, rmax[2]=325 (PLN003)\par
+\par
+2. For each value column k:\par
+   For each key block b:\par
+     a. Count non-null values in data[rmin[b]:rmax[b]]\par
+     b. Allocate va[vq]\par
+     c. Copy non-null values into va\par
+     d. Compute percentiles\par
+     e. Write output row\par}
+
+{\pard\sb60\b Output Example (1 value column, 3 plans):\par}
+{\pard\li720\f1\fs18
+ki=[0], kv=[PLN001], gi=[], gv=[], vi=0, vq=100\par
+vs=[5000.00, 12000.00, 25000.00, 50000.00, 95000.00, 150000.00, 200000.00]\par
+  Plan PLN001, balance column, 100 participants,\par
+  P50 (median) = $50,000\par
+\par
+ki=[0], kv=[PLN002], gi=[], gv=[], vi=0, vq=150\par
+vs=[3000.00, 8000.00, 20000.00, 45000.00, 85000.00, 140000.00, 190000.00]\par
+  Plan PLN002, 150 participants, median = $45,000\par
+\par
+ki=[0], kv=[PLN003], gi=[], gv=[], vi=0, vq=75\par
+vs=[8000.00, 15000.00, 30000.00, 60000.00, 110000.00, 175000.00, 225000.00]\par
+  Plan PLN003, 75 participants, median = $60,000\par}
+
+{\pard\sb60\b Interpretation:\par}
+{\pard\li720\fs20
+Each output row shows the distribution of participant values within that plan.\par
+\par
+Example for PLN001:\par
+\bullet  P05 = $5,000: 5% of participants have balance \'a3 $5,000\par
+\bullet  P25 = $25,000: 25% have balance \'a3 $25,000\par
+\bullet  P50 = $50,000: Median (half above, half below)\par
+\bullet  P75 = $95,000: 75% have balance \'a3 $95,000\par
+\bullet  P95 = $200,000: 95% have balance \'a3 $200,000\par}
+
+{\pard\sb60\b Output Volume:\par}
+{\pard\li720\fs20
+For 16 value columns, 1000 plans:\par
+16 \'d7 1000 = 16,000 output rows (one per plan per column)\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32\cf5 Summary: Key Differences\par}
+
+{\pard\sb120\b\fs24 Sum vs Box Mode:\par}
+{\pard\li720\sb60
+{\b Sum Mode}:\par
+\bullet  Reads data row-by-row\par
+\bullet  Accumulates totals in memory\par
+\bullet  Outputs: counts and sums\par
+\bullet  Memory efficient for large datasets\par
+\bullet  Output size proportional to unique combinations\par
+\par
+{\b Box Mode}:\par
+\bullet  Loads ALL data into heap first\par
+\bullet  Reads column-by-column\par
+\bullet  Sorts values and computes percentiles\par
+\bullet  Memory intensive (full dataset in RAM)\par
+\bullet  Output size much larger (one row per bucket)\par}
+
+{\pard\sb120\b\fs24 K (Keys) Parameter:\par}
+{\pard\li720\sb60
+{\b K=0}: Process all data together (global analysis)\par
+{\b K=1}: Process separately for each key (per-plan, per-participant)\par
+\par
+Requirement: When K=1, input MUST be sorted by key column\par}
+
+{\pard\sb120\b\fs24 G (Groups) Parameter:\par}
+{\pard\li720\sb60
+{\b G=0}: No grouping (simple aggregation)\par
+{\b G=1}: One dimension (e.g., 3 fund categories)\par
+{\b G=2}: Two dimensions (e.g., 3 mkt \'d7 18 pop = 54 combos)\par
+\par
+Each participant row contributes to multiple output rows\par
+(one for each group column combination)\par}
+
+{\pard\sb120\b\fs24 Output Array Conventions:\par}
+{\pard\li720\sb60
+{\b ki[]} - Key indices (always [0] for K=1)\par
+{\b kv[]} - Key values (actual IDs)\par
+{\b gi[]} - Group indices (which columns)\par
+{\b gv[]} - Group values (actual category codes)\par
+{\b DummySum[]} - Row counts (Sum mode)\par
+{\b ValueSum[]} - Column totals (Sum mode)\par
+{\b vi} - Value column index (Box mode)\par
+{\b vq} - Non-null value count (Box mode)\par
+{\b vs[]} - 7 percentiles: P05, P10, P25, P50, P75, P90, P95 (Box mode)\par}
+
+{\pard\sb120\b\fs24 Performance Characteristics:\par}
+{\pard\li720\sb60
+{\b Fastest}: K0G0 (single output row)\par
+{\b Fast}: K1G0 (one row per key)\par
+{\b Moderate}: K0G2, K1G1 (multiple groups)\par
+{\b Memory-Intensive}: All Box modes (heap required)\par
+{\b Largest Output}: BoxK0G2 with high cardinality groups\par}
+
+\page
+
+{\pard\sb240\sa120\b\fs32 Appendix: Real-World Use Cases\par}
+
+{\pard\sb120\b\fs24 1. Participant Summary (K1G0, Sum):\par}
+{\pard\li720\fs20
+Compute total balance, contributions, withdrawals per participant\par
+Input: Monthly snapshots\par
+Output: One row per participant with lifetime totals\par}
+
+{\pard\sb120\b\fs24 2. Plan Benchmarking (K1G0, Box):\par}
+{\pard\li720\fs20
+Compare participant distributions across plans\par
+Input: Current participant balances\par
+Output: Percentiles showing distribution shape per plan\par}
+
+{\pard\sb120\b\fs24 3. Segmented Analytics (K0G2, Sum):\par}
+{\pard\li720\fs20
+Cross-tabulate participants by market segment and demographics\par
+Input: Participant characteristics and balances\par
+Output: Totals for each (market, demographic) combination\par}
+
+{\pard\sb120\b\fs24 4. Plan Deferral Analysis (K1G1, Box):\par}
+{\pard\li720\fs20
+Distribution of deferrals by fund category within each plan\par
+Input: Plan-level participant deferrals by fund type\par
+Output: Percentiles showing how deferrals distribute across categories\par}
+
+{\pard\sb120\b\fs24 5. Cross-Tab Distributions (K0G2, Box):\par}
+{\pard\li720\fs20
+Return distributions by market segment and population cohort\par
+Input: Participant returns with multiple grouping attributes\par
+Output: Percentiles for each combination (e.g., Large-Plan + Age-50-60)\par}
+
+{\pard\qc\sb240\fs20\par}
+{\pard\qc\b\fs24 End of Document\par}
+{\pard\qc\fs18 Generated from CrunchCore.cs\par}
+{\pard\qc\fs18 All 8 Functions Documented with Examples\par}
+
+}
